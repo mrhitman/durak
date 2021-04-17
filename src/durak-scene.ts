@@ -34,10 +34,6 @@ export class DurakScene extends Scene {
     this.pack = shuffle(this.pack);
   }
 
-  public takeCardFromPack() {
-    return this.pack.pop();
-  }
-
   public create() {
     this.bg = this.add
       .tileSprite(0, 0, screen.availWidth - 40, screen.availHeight - 130, "table")
@@ -77,7 +73,9 @@ export class DurakScene extends Scene {
     );
   }
 
-  public createEnemyHand(count: number, x: number, y: number) {
+  public update() {}
+
+  private createEnemyHand(count: number, x: number, y: number) {
     const group = this.add.group();
 
     let offsetX = 0;
@@ -94,7 +92,7 @@ export class DurakScene extends Scene {
     return group;
   }
 
-  public createPlayerHand(hand: Hand, x: number, y: number) {
+  private createPlayerHand(hand: Hand, x: number, y: number) {
     const group = this.add.group();
 
     let offsetX = 0;
@@ -111,7 +109,7 @@ export class DurakScene extends Scene {
     return group;
   }
 
-  public createPack(card: Card, count: number, x: number, y: number) {
+  private createPack(card: Card, count: number, x: number, y: number) {
     const group = this.add.group();
 
     let offsetX = 0;
@@ -137,5 +135,7 @@ export class DurakScene extends Scene {
     return group;
   }
 
-  public update() {}
+  private takeCardFromPack() {
+    return this.pack.pop();
+  }
 }
