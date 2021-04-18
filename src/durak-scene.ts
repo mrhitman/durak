@@ -1,4 +1,4 @@
-import { range, chain, shuffle } from "lodash";
+import { range, shuffle } from "lodash";
 import { GameObjects, Scene } from "phaser";
 import { cards, suits } from "./constants";
 
@@ -13,6 +13,7 @@ interface Pack {
 }
 
 const scale = 0.24;
+let depth = 1;
 export class DurakScene extends Scene {
   protected bg: GameObjects.TileSprite;
   protected cards: Record<string, GameObjects.TileSprite>;
@@ -97,13 +98,39 @@ export class DurakScene extends Scene {
 
     let offsetX = 0;
     for (const card of hand) {
-      group.add(
-        this.add
-          .sprite(x + offsetX, y, `${card.card}${card.suit}`)
-          .setScale(scale, scale)
-          .setOrigin(0, 0)
-      );
-      offsetX += 24;
+      const obj = this.add
+        .sprite(x + offsetX, y, `${card.card}${card.suit}`)
+        .setDepth(depth++)
+        .setScale(scale, scale)
+        .setOrigin(0, 0)
+        .setInteractive();
+
+      obj
+        .addListener(
+          "pointerover",
+          (p: PointerEvent) => {
+            obj.setState(obj.depth);
+            obj.setDepth(Number.MAX_SAFE_INTEGER);
+          },
+          this
+        )
+        .addListener(
+          "pointerout",
+          (p: PointerEvent) => {
+            obj.setDepth(+obj.state);
+          },
+          this
+        )
+        .addListener(
+          "pointerdown",
+          () => {
+            console.log("click");
+          },
+          this
+        );
+
+      group.add(obj);
+      offsetX += 30;
     }
 
     return group;
