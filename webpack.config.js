@@ -1,6 +1,6 @@
 const path = require('path');
 const CopyPlugin = require("copy-webpack-plugin");
-const BrowserSyncPlugin = require("browser-sync-webpack-plugin");
+// const BrowserSyncPlugin = require("browser-sync-webpack-plugin");
 
 module.exports = {
   entry: './src/main.ts',
@@ -23,13 +23,13 @@ module.exports = {
         { from: "public" },
       ],
     }),
-    new BrowserSyncPlugin({
-      host: 'localhost',
-      port: 3000,
-      server: {
-        baseDir: ["./dist"]
-      }
-    })
+    // new BrowserSyncPlugin({
+    //   host: 'localhost',
+    //   port: 3000,
+    //   server: {
+    //     baseDir: ["./dist"]
+    //   }
+    // })
   ],
   output: {
     path: path.resolve(__dirname, 'dist'),

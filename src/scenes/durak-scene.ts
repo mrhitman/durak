@@ -1,27 +1,24 @@
-import { range, shuffle } from "lodash";
-import { GameObjects, Scene } from "phaser";
-import { cards, suits } from "./constants";
+import { range, shuffle } from 'lodash';
+import { GameObjects, Scene } from 'phaser';
+import { HandCard } from '../hand-card';
+import { cards, suits } from '../constants';
 
 interface Card {
   card: string;
   suit: string;
 }
 type Hand = Array<Card>;
-interface Pack {
-  trump: Card;
-  cardsCount: number;
-}
-
 const scale = 0.24;
-let depth = 1;
 export class DurakScene extends Scene {
+  protected depth = 1;
   protected bg: GameObjects.TileSprite;
-  protected cards: Record<string, GameObjects.TileSprite>;
+  protected hand: Array<HandCard>;
   protected pack: Array<Card> = [];
+  public slot = 0;
 
   public preload() {
-    this.load.image("table", "assets/table.png");
-    this.load.image("back", "assets/green_back.png");
+    this.load.image('table', 'assets/table.png');
+    this.load.image('back', 'assets/green_back.png');
 
     for (const card of cards) {
       for (const suit of suits) {
@@ -37,40 +34,32 @@ export class DurakScene extends Scene {
 
   public create() {
     this.bg = this.add
-      .tileSprite(0, 0, screen.availWidth - 40, screen.availHeight - 130, "table")
+      .tileSprite(
+        0,
+        0,
+        screen.availWidth - 40,
+        screen.availHeight - 130,
+        'table',
+      )
       .setOrigin(0, 0);
 
     this.createPlayerHand(
-      [
-        this.takeCardFromPack(),
-        this.takeCardFromPack(),
-        this.takeCardFromPack(),
-        this.takeCardFromPack(),
-        this.takeCardFromPack(),
-        this.takeCardFromPack(),
-      ],
+      this.takeCardsFromPack(6),
       this.game.canvas.width * 0.4,
-      this.game.canvas.height * 0.7
+      this.game.canvas.height * 0.7,
     );
-    const enemyHand = [
-      this.takeCardFromPack(),
-      this.takeCardFromPack(),
-      this.takeCardFromPack(),
-      this.takeCardFromPack(),
-      this.takeCardFromPack(),
-      this.takeCardFromPack(),
-    ];
+    const enemyHand = this.takeCardsFromPack(6);
 
     this.createEnemyHand(
       enemyHand.length,
       this.game.canvas.width * 0.4,
-      this.game.canvas.height * 0.01
+      this.game.canvas.height * 0.01,
     );
     this.createPack(
       this.takeCardFromPack(),
       this.pack.length,
       this.game.canvas.width * 0.9,
-      this.game.canvas.height * 0.35
+      this.game.canvas.height * 0.35,
     );
   }
 
@@ -85,7 +74,7 @@ export class DurakScene extends Scene {
         this.add
           .sprite(x + offsetX, y, `back`)
           .setScale(scale, scale)
-          .setOrigin(0, 0)
+          .setOrigin(0, 0),
       );
       offsetX += 24;
     }
@@ -98,38 +87,20 @@ export class DurakScene extends Scene {
 
     let offsetX = 0;
     for (const card of hand) {
-      const obj = this.add
-        .sprite(x + offsetX, y, `${card.card}${card.suit}`)
-        .setDepth(depth++)
+      const cardSprite = new HandCard(
+        this,
+        x + offsetX,
+        y,
+        `${card.card}${card.suit}`,
+      )
+        .setDepth(this.depth++)
         .setScale(scale, scale)
-        .setOrigin(0, 0)
+        .setOrigin(0, 0.1)
         .setInteractive();
 
-      obj
-        .addListener(
-          "pointerover",
-          (p: PointerEvent) => {
-            obj.setState(obj.depth);
-            obj.setDepth(Number.MAX_SAFE_INTEGER);
-          },
-          this
-        )
-        .addListener(
-          "pointerout",
-          (p: PointerEvent) => {
-            obj.setDepth(+obj.state);
-          },
-          this
-        )
-        .addListener(
-          "pointerdown",
-          () => {
-            console.log("click");
-          },
-          this
-        );
+      this.add.existing(cardSprite);
 
-      group.add(obj);
+      group.add(cardSprite);
       offsetX += 30;
     }
 
@@ -145,24 +116,28 @@ export class DurakScene extends Scene {
         .sprite(x + 70, y + 118, `${card.card}${card.suit}`)
         .setScale(scale, scale)
         .setAngle(90)
-        .setOrigin(0.5, 0.05)
+        .setOrigin(0.5, 0.05),
     );
     offsetX += 60;
 
-    range(0, count).map(() => {
+    for (let i = 0; i <= count; i++) {
       group.add(
         this.add
           .sprite(x + offsetX, y, `back`)
           .setScale(scale, scale)
-          .setOrigin(0.5, 0.05)
+          .setOrigin(0.5, 0.05),
       );
       offsetX += Math.min(50 / count, 10);
-    });
+    }
 
     return group;
   }
 
   private takeCardFromPack() {
-    return this.pack.pop();
+    return this.pack.shift();
+  }
+
+  private takeCardsFromPack(count: number = 1) {
+    return this.pack.splice(0, count);
   }
 }
