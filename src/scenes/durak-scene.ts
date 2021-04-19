@@ -2,6 +2,8 @@ import { range, shuffle } from 'lodash';
 import { GameObjects, Scene } from 'phaser';
 import { HandCard } from '../hand-card';
 import { cards, suits } from '../constants';
+import { Game } from '../objects/game';
+import { IUserPlayer } from '../objects/interfaces';
 
 interface Card {
   card: string;
@@ -12,8 +14,8 @@ const scale = 0.24;
 export class DurakScene extends Scene {
   protected depth = 1;
   protected bg: GameObjects.TileSprite;
-  protected hand: Array<HandCard>;
   protected pack: Array<Card> = [];
+  protected g: Game;
   public slot = 0;
 
   public preload() {
@@ -30,6 +32,8 @@ export class DurakScene extends Scene {
       }
     }
     this.pack = shuffle(this.pack);
+    this.g = new Game();
+    this.g.deal();
   }
 
   public create() {
@@ -44,35 +48,43 @@ export class DurakScene extends Scene {
       .setOrigin(0, 0);
 
     this.createPlayerHand(
-      this.takeCardsFromPack(6),
       this.game.canvas.width * 0.4,
       this.game.canvas.height * 0.7,
     );
-    const enemyHand = this.takeCardsFromPack(6);
-
     this.createEnemyHand(
-      enemyHand.length,
       this.game.canvas.width * 0.4,
       this.game.canvas.height * 0.01,
     );
     this.createPack(
-      this.takeCardFromPack(),
-      this.pack.length,
       this.game.canvas.width * 0.9,
       this.game.canvas.height * 0.35,
     );
+    this.add
+      .sprite(0, 0, 'back')
+      .setInteractive()
+      .setScale(0.2, 0.2)
+      .addListener('pointerdown', () => {
+        this.scene.restart();
+        this.g.deal();
+        this.create();
+      });
   }
 
   public update() {}
 
-  private createEnemyHand(count: number, x: number, y: number) {
+  private createEnemyHand(x: number, y: number) {
     const group = this.add.group();
 
     let offsetX = 0;
-    for (const _ of range(0, count)) {
+    for (const _ of range(0, this.g.defender.hand.cards.length)) {
       group.add(
         this.add
-          .sprite(x + offsetX, y, `back`)
+          // .sprite(x + offsetX, y, `back`)
+          .sprite(
+            x + offsetX,
+            y,
+            `${this.g.defender.hand.cards[_].rank}${this.g.defender.hand.cards[_].suit}`,
+          )
           .setScale(scale, scale)
           .setOrigin(0, 0),
       );
@@ -82,16 +94,16 @@ export class DurakScene extends Scene {
     return group;
   }
 
-  private createPlayerHand(hand: Hand, x: number, y: number) {
+  private createPlayerHand(x: number, y: number) {
     const group = this.add.group();
 
     let offsetX = 0;
-    for (const card of hand) {
+    for (const card of this.g.attacker.hand.cards) {
       const cardSprite = new HandCard(
         this,
         x + offsetX,
         y,
-        `${card.card}${card.suit}`,
+        `${card.rank}${card.suit}`,
       )
         .setDepth(this.depth++)
         .setScale(scale, scale)
@@ -107,37 +119,33 @@ export class DurakScene extends Scene {
     return group;
   }
 
-  private createPack(card: Card, count: number, x: number, y: number) {
+  private createPack(x: number, y: number) {
     const group = this.add.group();
 
     let offsetX = 0;
     group.add(
       this.add
-        .sprite(x + 70, y + 118, `${card.card}${card.suit}`)
+        .sprite(
+          x + 70,
+          y + 118,
+          `${this.g.pack.trump.rank}${this.g.pack.trump.suit}`,
+        )
         .setScale(scale, scale)
         .setAngle(90)
         .setOrigin(0.5, 0.05),
     );
     offsetX += 60;
 
-    for (let i = 0; i <= count; i++) {
+    for (let i = 0; i <= this.g.pack.cards.length; i++) {
       group.add(
         this.add
           .sprite(x + offsetX, y, `back`)
           .setScale(scale, scale)
           .setOrigin(0.5, 0.05),
       );
-      offsetX += Math.min(50 / count, 10);
+      offsetX += Math.min(50 / this.g.pack.cards.length, 10);
     }
 
     return group;
-  }
-
-  private takeCardFromPack() {
-    return this.pack.shift();
-  }
-
-  private takeCardsFromPack(count: number = 1) {
-    return this.pack.splice(0, count);
   }
 }
