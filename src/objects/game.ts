@@ -1,16 +1,10 @@
-import { random } from 'lodash';
-import { Card } from './card';
-import { Hand } from './hand';
-import {
-  CardRank,
-  CardSuit,
-  ICard,
-  IGame,
-  IPack,
-  IUserPlayer,
-} from './interfaces';
-import { Pack } from './pack';
-import { Player } from './player';
+import { IGame, IPack, ICard, CardRank, CardSuit } from "./interfaces";
+import { Player } from "./player";
+import { Hand } from "./hand";
+import { Pack } from "./pack";
+import { Card } from "./card";
+import { random } from "lodash";
+import { IUserPlayer } from "./interfaces";
 
 export class Game implements IGame {
   public tableCards: ICard[] = [];
@@ -48,7 +42,7 @@ export class Game implements IGame {
   }
 
   deal(): void {
-    console.log('DEAL');
+    console.log("DEAL");
     const cards = [];
     for (let rank of Object.values(CardRank)) {
       for (let suit of Object.values(CardSuit)) {
