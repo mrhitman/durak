@@ -1,30 +1,47 @@
+import { random } from 'lodash';
+import { Card } from './card';
+import { Hand } from './hand';
 import {
-  IGame,
-  IPack,
-  IPlayer,
-  ITable,
   CardRank,
   CardSuit,
+  ICard,
+  IGame,
+  IPack,
+  IUserPlayer,
 } from './interfaces';
-import { Player } from './player';
-import { Hand } from './hand';
-import { Table } from './table';
 import { Pack } from './pack';
-import { Card } from './card';
-import { random } from 'lodash';
-import { IUserPlayer } from './interfaces';
+import { Player } from './player';
 
 export class Game implements IGame {
-  readonly table: ITable;
+  public tableCards: ICard[] = [];
+  public discardPile: ICard[] = [];
   public pack: IPack;
+
   attacker: IUserPlayer;
   defender: IUserPlayer;
 
-  constructor() {
-    this.table = new Table();
+  constructor() {}
+
+  toAbandonTheDefence(): void {
+    this.tableCards.map((c) => this.defender.hand.addCard(c));
+    this.tableCards.length = 0;
   }
 
-  nextTurn(): void {
+  successfullDefense(): void {
+    this.discardPile.push(...this.tableCards);
+    this.tableCards.length = 0;
+  }
+
+  toTable(card: ICard): void {
+    this.tableCards.push(card);
+  }
+
+  toDiscard(card: ICard): void {
+    this.tableCards = this.tableCards.filter((c) => !c.isEqual(card));
+    this.discardPile.push(card);
+  }
+
+  swapRoles(): void {
     const tmp = this.attacker;
     this.attacker = this.defender;
     this.defender = tmp;
@@ -49,35 +66,19 @@ export class Game implements IGame {
     const p1Trump = player1.hand.getLowestTrump();
     const p2Trump = player2.hand.getLowestTrump();
 
+    let isFirst: boolean;
     if (p1Trump && p2Trump) {
-      if (p1Trump.isGreater(p2Trump)) {
-        this.attacker = player2;
-        this.defender = player1;
-      } else {
-        this.attacker = player1;
-        this.defender = player2;
-      }
-      return;
-    }
-
-    if (p1Trump && !p2Trump) {
-      this.attacker = player1;
-      this.defender = player2;
-      return;
-    }
-
-    if (p2Trump && !p1Trump) {
-      this.attacker = player2;
-      this.defender = player1;
-      return;
-    }
-
-    if (random(0, 100) >= 50) {
-      this.attacker = player1;
-      this.defender = player2;
+      isFirst = p1Trump.isGreater(p2Trump);
+    } else if (p1Trump && !p2Trump) {
+      isFirst = true;
+    } else if (p2Trump && !p1Trump) {
+      isFirst = false;
     } else {
-      this.attacker = player1;
+      isFirst = random(0, 100) >= 50;
       this.defender = player2;
     }
+
+    this.attacker = isFirst ? player1 : player2;
+    this.defender = isFirst ? player2 : player1;
   }
 }

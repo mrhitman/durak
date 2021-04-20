@@ -21,6 +21,7 @@ export class DurakScene extends Scene {
   public preload() {
     this.load.image('table', 'assets/table.png');
     this.load.image('back', 'assets/green_back.png');
+    this.load.image('button', 'assets/button.png');
 
     for (const card of cards) {
       for (const suit of suits) {
@@ -60,13 +61,14 @@ export class DurakScene extends Scene {
       this.game.canvas.height * 0.35,
     );
     this.add
-      .sprite(0, 0, 'back')
+      .sprite(75, 40, 'button')
       .setInteractive()
-      .setScale(0.2, 0.2)
+      .setScale(0.15, 0.15)
       .addListener('pointerdown', () => {
         this.scene.restart();
         this.g.deal();
         this.create();
+        this.slot = 0;
       });
   }
 

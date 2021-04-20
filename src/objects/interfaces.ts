@@ -59,22 +59,17 @@ export interface IEnemyPlayer extends IPlayer {
   handCount: number;
 }
 
-export interface ITable {
-  cards: Array<ICard>;
-  discard: Array<ICard>;
-
-  toAbandonTheDefence(): void;
-  successfullDefense(): void;
-  add(card: ICard): void;
-  toDiscard(card: ICard): void;
-}
-
 export interface IGame {
-  table: ITable;
+  tableCards: Array<ICard>;
+  discardPile: Array<ICard>;
   pack: IPack;
   attacker: IPlayer;
   defender: IPlayer;
 
   deal(): void;
-  nextTurn(): void;
+  swapRoles(): void;
+  toAbandonTheDefence(): void;
+  successfullDefense(): void;
+  toTable(card: ICard): void;
+  toDiscard(card: ICard): void;
 }
