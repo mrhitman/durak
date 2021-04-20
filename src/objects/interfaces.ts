@@ -1,24 +1,24 @@
 export enum CardRank {
-  'two' = '2',
-  'three' = '3',
-  'four' = '4',
-  'fifth' = '5',
-  'six' = '6',
-  'seven' = '7',
-  'eight' = '8',
-  'nine' = '9',
-  'ten' = '10',
-  'Jack' = 'J',
-  'Queen' = 'Q',
-  'King' = 'K',
-  'Ace' = 'A',
+  "two" = "2",
+  "three" = "3",
+  "four" = "4",
+  "fifth" = "5",
+  "six" = "6",
+  "seven" = "7",
+  "eight" = "8",
+  "nine" = "9",
+  "ten" = "10",
+  "Jack" = "J",
+  "Queen" = "Q",
+  "King" = "K",
+  "Ace" = "A",
 }
 
 export enum CardSuit {
-  'Diamonds' = 'D',
-  'Spades' = 'S',
-  'Clubs' = 'C',
-  'Hearts' = 'H',
+  "Diamonds" = "D",
+  "Spades" = "S",
+  "Clubs" = "C",
+  "Hearts" = "H",
 }
 
 export interface ICard {
@@ -76,5 +76,5 @@ export interface IGame {
   defender: IPlayer;
 
   deal(): void;
-  nextTurn(): void;
+  switchRoles(): void;
 }

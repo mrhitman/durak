@@ -1,18 +1,11 @@
-import {
-  IGame,
-  IPack,
-  IPlayer,
-  ITable,
-  CardRank,
-  CardSuit,
-} from './interfaces';
-import { Player } from './player';
-import { Hand } from './hand';
-import { Table } from './table';
-import { Pack } from './pack';
-import { Card } from './card';
-import { random } from 'lodash';
-import { IUserPlayer } from './interfaces';
+import { IGame, IPack, IPlayer, ITable, CardRank, CardSuit } from "./interfaces";
+import { Player } from "./player";
+import { Hand } from "./hand";
+import { Table } from "./table";
+import { Pack } from "./pack";
+import { Card } from "./card";
+import { random } from "lodash";
+import { IUserPlayer } from "./interfaces";
 
 export class Game implements IGame {
   readonly table: ITable;
@@ -24,14 +17,14 @@ export class Game implements IGame {
     this.table = new Table();
   }
 
-  nextTurn(): void {
+  switchRoles(): void {
     const tmp = this.attacker;
     this.attacker = this.defender;
     this.defender = tmp;
   }
 
   deal(): void {
-    console.log('DEAL');
+    console.log("DEAL");
     const cards = [];
     for (let rank of Object.values(CardRank)) {
       for (let suit of Object.values(CardSuit)) {
