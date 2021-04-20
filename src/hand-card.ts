@@ -23,11 +23,13 @@ export class HandCard extends GameObjects.Sprite {
 
   protected onMouseOver(p: PointerEvent) {
     this.oldDepth = this.depth;
+    this.setY(this.y - 30);
     this.setDepth(Number.MAX_SAFE_INTEGER);
   }
 
   protected onMouseOut() {
     this.setDepth(this.oldDepth);
+    this.setY(this.y + 30);
   }
 
   protected onMouseDown(p: PointerEvent) {

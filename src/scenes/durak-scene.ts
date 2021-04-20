@@ -3,19 +3,12 @@ import { GameObjects, Scene } from "phaser";
 import { HandCard } from "../hand-card";
 import { cards, suits } from "../constants";
 import { Game } from "../objects/game";
-import { IUserPlayer } from "../objects/interfaces";
 
-interface Card {
-  card: string;
-  suit: string;
-}
-type Hand = Array<Card>;
 const scale = 0.24;
 export class DurakScene extends Scene {
   protected depth = 1;
   protected bg: GameObjects.TileSprite;
-  protected pack: Array<Card> = [];
-  protected g: Game;
+  protected engine: Game;
   public slot = 0;
 
   public preload() {
@@ -25,16 +18,11 @@ export class DurakScene extends Scene {
 
     for (const card of cards) {
       for (const suit of suits) {
-        this.pack.push({
-          card,
-          suit,
-        });
         this.load.image(`${card}${suit}`, `assets/${card}${suit}.png`);
       }
     }
-    this.pack = shuffle(this.pack);
-    this.g = new Game();
-    this.g.deal();
+    this.engine = new Game();
+    this.engine.deal();
   }
 
   public create() {
@@ -49,31 +37,34 @@ export class DurakScene extends Scene {
       .sprite(70, 30, "button")
       .setOrigin(0.5, 0.5)
       .setInteractive()
-      .setScale(0.2, 0.2)
+      .setScale(0.1, 0.1)
       .addListener("pointerdown", () => {
         this.scene.restart();
         this.create();
         this.slot = 0;
       });
-
+    this.add.text(50, 24, 'RESET', { color: '#000' });
     this.add
       .sprite(70, 80, "button")
       .setOrigin(0.5, 0.5)
       .setInteractive()
-      .setScale(0.2, 0.2)
+      .setScale(0.1, 0.1)
       .addListener("pointerdown", () => {
         (this.add as any).displayList.removeAll();
-        this.g.swapRoles();
+        this.engine.swapRoles();
         this.create();
       });
+    this.add.text(54, 74, 'SWAP', { color: '#000' });
     this.add
-      .sprite(70, 120, "button")
+      .sprite(70, 130, "button")
       .setOrigin(0.5, 0.5)
       .setInteractive()
-      .setScale(0.2, 0.2)
+      .setScale(0.1, 0.1)
       .addListener("pointerdown", () => {
         // abandond the defence
       });
+
+    this.add.text(54, 124, 'PASS', { color: '#000' });
   }
 
   public update() {}
@@ -82,7 +73,7 @@ export class DurakScene extends Scene {
     const group = this.add.group();
 
     let offsetX = 0;
-    for (const _ of range(0, this.g.defender.hand.cards.length)) {
+    for (const _ of range(0, this.engine.defender.hand.cards.length)) {
       group.add(
         this.add
           .sprite(x + offsetX, y, `back`)
@@ -99,7 +90,7 @@ export class DurakScene extends Scene {
     const group = this.add.group();
 
     let offsetX = 0;
-    for (const card of this.g.attacker.hand.cards) {
+    for (const card of this.engine.attacker.hand.cards) {
       const cardSprite = new HandCard(this, x + offsetX, y, `${card.rank}${card.suit}`)
         .setDepth(this.depth++)
         .setScale(scale, scale)
@@ -121,21 +112,21 @@ export class DurakScene extends Scene {
     let offsetX = 0;
     group.add(
       this.add
-        .sprite(x + 70, y + 118, `${this.g.pack.trump.rank}${this.g.pack.trump.suit}`)
+        .sprite(x + 70, y + 118, `${this.engine.pack.trump.rank}${this.engine.pack.trump.suit}`)
         .setScale(scale, scale)
         .setAngle(90)
         .setOrigin(0.5, 0.05)
     );
     offsetX += 60;
 
-    for (let i = 0; i <= this.g.pack.cards.length; i++) {
+    for (let i = 0; i <= this.engine.pack.cards.length; i++) {
       group.add(
         this.add
           .sprite(x + offsetX, y, `back`)
           .setScale(scale, scale)
           .setOrigin(0.5, 0.05)
       );
-      offsetX += Math.min(50 / this.g.pack.cards.length, 10);
+      offsetX += Math.min(50 / this.engine.pack.cards.length, 10);
     }
 
     return group;
