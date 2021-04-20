@@ -67,13 +67,9 @@ export interface IGame {
   defender: IPlayer;
 
   deal(): void;
-<<<<<<< HEAD
   swapRoles(): void;
   toAbandonTheDefence(): void;
   successfullDefense(): void;
   toTable(card: ICard): void;
   toDiscard(card: ICard): void;
-=======
-  switchRoles(): void;
->>>>>>> cc5f109d949aa2e80211a768e88e152bc5714dcd
 }
