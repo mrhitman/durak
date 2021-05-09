@@ -64,6 +64,7 @@ export interface IGame {
   beatenTableCards: Array<ICard>;
   discardPile: Array<ICard>;
   pack: IPack;
+  players: IUserPlayer[];
   attacker: IPlayer;
   defender: IPlayer;
 

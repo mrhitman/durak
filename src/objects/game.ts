@@ -1,10 +1,9 @@
-import { IGame, IPack, ICard, CardRank, CardSuit, IPlayer } from "./interfaces";
-import { Player } from "./player";
-import { Hand } from "./hand";
-import { Pack } from "./pack";
+import { chain } from "lodash";
 import { Card } from "./card";
-import { random } from "lodash";
-import { IUserPlayer } from "./interfaces";
+import { Hand } from "./hand";
+import { CardRank, CardSuit, ICard, IGame, IPack, IPlayer, IUserPlayer } from "./interfaces";
+import { Pack } from "./pack";
+import { Player } from "./player";
 
 enum GameState {
   start,
@@ -22,6 +21,7 @@ export class Game implements IGame {
 
   attacker: IUserPlayer;
   defender: IUserPlayer;
+  players: IUserPlayer[] = [];
 
   constructor() {
     this.state = GameState.start;
@@ -68,9 +68,7 @@ export class Game implements IGame {
   }
 
   swapRoles(): void {
-    const tmp = this.attacker;
-    this.attacker = this.defender;
-    this.defender = tmp;
+    this.players.unshift(this.players.pop());
   }
 
   deal(): void {
@@ -92,26 +90,26 @@ export class Game implements IGame {
     this.state = GameState.attacking;
   }
 
-  protected initRoles() {
-    const player1 = new Player(this, new Hand([], this.pack.trump));
-    const player2 = new Player(this, new Hand([], this.pack.trump));
-    this.pack.take(6).map((c) => player1.hand.addCard(c));
-    this.pack.take(6).map((c) => player2.hand.addCard(c));
+  protected initRoles(players = 2) {
+    const MAX_PLAYERS = 4;
+    players = Math.min(players, MAX_PLAYERS);
 
-    const p1Trump = player1.hand.getLowestTrump();
-    const p2Trump = player2.hand.getLowestTrump();
-
-    let isFirst: boolean = !!p1Trump;
-    if (p1Trump && p2Trump) {
-      isFirst = p1Trump.isGreater(p2Trump);
-    } else if (p2Trump && !p1Trump) {
-      isFirst = false;
-    } else {
-      isFirst = random(0, 100) >= 50;
-      this.defender = player2;
+    for (let i = 0; i < players; i++) {
+      const player = new Player(this, new Hand([], this.pack.trump));
+      this.pack.take(6).map((c) => player.hand.addCard(c));
+      this.players.push(player);
     }
+    const chainedPlayers = chain(this.players);
 
-    this.attacker = isFirst ? player1 : player2;
-    this.defender = isFirst ? player2 : player1;
+    this.attacker = chainedPlayers.sort((p1, p2) => {
+      const t1 = p1.hand.getLowestTrump();
+      const t2 = p2.hand.getLowestTrump();
+
+      if (t1 && t2) {
+        return t1.isGreater(t2) ? 1 : -1;
+      }
+      
+      return t1 ? 1 : -1;
+    }).first().value() || chainedPlayers.shuffle().first().value();
   }
 }
