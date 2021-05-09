@@ -4,6 +4,7 @@ import { shuffle } from 'lodash';
 export class Pack implements IPack {
   protected _trump: ICard;
   protected _cards: ICard[]
+  private isEmpty: boolean = false;
 
   constructor(cards: ICard[]) {
     this._cards = cards;
@@ -18,11 +19,29 @@ export class Pack implements IPack {
   }
 
   take(count: number): Array<ICard> {
-    return this.cards.splice(0, count);
+    if (this.isEmpty) {
+      return;
+    }
+
+    if (this.cards.length > count) {
+      return this.cards.splice(0, count);
+    }
+
+    this.isEmpty = true;
+    return this.cards.splice(0, Math.min(count, this.cards.length));
   }
 
   takeOne(): ICard {
-    return this.cards.shift();
+    if (this.isEmpty) {
+      return;
+    }
+
+    if (this.cards.length) {
+      return this.cards.shift();
+    }
+
+    this.isEmpty = true;
+    return this.trump;
   }
 
   shuffle(): void {

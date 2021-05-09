@@ -11,4 +11,8 @@ export class Card implements ICard {
     const keys = Object.values(CardRank);
     return keys.indexOf(this.rank) > keys.indexOf(card.rank);
   }
+
+  canBeat(card: ICard, trump: CardSuit): boolean {
+    return card.suit === this.suit ? this.isGreater(card) : this.suit === trump;
+  }
 }

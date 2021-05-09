@@ -26,6 +26,7 @@ export interface ICard {
   suit: CardSuit;
   isGreater(card: ICard): boolean;
   isEqual(card: ICard): boolean;
+  canBeat(card: ICard, trump: CardSuit): boolean;
 }
 
 export interface IHand {
@@ -60,6 +61,7 @@ export interface IEnemyPlayer extends IPlayer {
 
 export interface IGame {
   tableCards: Array<ICard>;
+  beatenTableCards: Array<ICard>;
   discardPile: Array<ICard>;
   pack: IPack;
   attacker: IPlayer;
@@ -67,6 +69,7 @@ export interface IGame {
 
   deal(): void;
   swapRoles(): void;
+  beat(card: ICard, target: ICard): void;
   toAbandonTheDefence(): void;
   successfullDefense(): void;
   toTable(card: ICard): void;
