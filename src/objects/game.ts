@@ -1,4 +1,4 @@
-import { IGame, IPack, ICard, CardRank, CardSuit } from "./interfaces";
+import { IGame, IPack, ICard, CardRank, CardSuit, IPlayer } from "./interfaces";
 import { Player } from "./player";
 import { Hand } from "./hand";
 import { Pack } from "./pack";
@@ -17,7 +17,7 @@ export class Game implements IGame {
   constructor() {}
 
   toAbandonTheDefence(): void {
-    this.tableCards.map((c) => this.defender.hand.addCard(c));
+    this.tableCards.map((card) => this.defender.hand.addCard(card));
     this.tableCards.length = 0;
   }
 
@@ -42,7 +42,6 @@ export class Game implements IGame {
   }
 
   deal(): void {
-    console.log("DEAL");
     const cards = [];
     for (let rank of Object.values(CardRank)) {
       for (let suit of Object.values(CardSuit)) {
@@ -52,19 +51,32 @@ export class Game implements IGame {
 
     this.pack = new Pack(cards);
     this.pack.shuffle();
-    const player1 = new Player(new Hand([], this.pack.trump));
-    const player2 = new Player(new Hand([], this.pack.trump));
+    this.initRoles();
+  }
+
+  onCardClick(player: IPlayer, card: ICard) {
+    player.put(card);
+    this.tableCards.push(card);
+    
+    // console.log(card, player)
+  }
+
+  step(): void {
+    
+  }
+
+  protected initRoles() {
+    const player1 = new Player(this, new Hand([], this.pack.trump));
+    const player2 = new Player(this, new Hand([], this.pack.trump));
     this.pack.take(6).map((c) => player1.hand.addCard(c));
     this.pack.take(6).map((c) => player2.hand.addCard(c));
 
     const p1Trump = player1.hand.getLowestTrump();
     const p2Trump = player2.hand.getLowestTrump();
 
-    let isFirst: boolean;
+    let isFirst: boolean = !!p1Trump;
     if (p1Trump && p2Trump) {
       isFirst = p1Trump.isGreater(p2Trump);
-    } else if (p1Trump && !p2Trump) {
-      isFirst = true;
     } else if (p2Trump && !p1Trump) {
       isFirst = false;
     } else {

@@ -1,18 +1,18 @@
-import { IHand, IHandCard, ICard } from './interfaces';
-import { HandCard } from './hand-card';
+import { IHand, ICard } from './interfaces';
+import { Card } from './card';
 
 export class Hand implements IHand {
-  constructor(public cards: IHandCard[], readonly trump: ICard) {}
+  constructor(public cards: ICard[], readonly trump: ICard) {}
 
   addCard(card: ICard): void {
-    this.cards.push(new HandCard(card.rank, card.suit));
+    this.cards.push(new Card(card.rank, card.suit));
   }
 
   removeCard(card: ICard): void {
     this.cards = this.cards.filter((hc) => !hc.isEqual(card));
   }
 
-  getLowestTrump(): IHandCard | null {
+  getLowestTrump(): ICard | null {
     return this.cards.reduce((acc, hc) => {
       if (hc.suit === this.trump.suit) {
         if (acc) {
@@ -26,7 +26,7 @@ export class Hand implements IHand {
     }, null);
   }
 
-  getLowestCard(): IHandCard | null {
+  getLowestCard(): ICard | null {
     return this.cards.reduce((acc, hc) => {
       if (acc) {
         return hc.isGreater(acc) ? acc : hc;
@@ -36,7 +36,7 @@ export class Hand implements IHand {
     }, null);
   }
 
-  getHigherCard(): IHandCard | null {
+  getHigherCard(): ICard | null {
     return this.cards.reduce((acc, hc) => {
       if (acc) {
         return hc.isGreater(acc) ? hc : acc;

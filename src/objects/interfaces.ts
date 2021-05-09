@@ -28,17 +28,13 @@ export interface ICard {
   isEqual(card: ICard): boolean;
 }
 
-export interface IHandCard extends ICard {
-  attack(): void;
-}
-
 export interface IHand {
-  cards: Array<IHandCard>;
+  cards: Array<ICard>;
   addCard(card: ICard): void;
   removeCard(card: ICard): void;
-  getLowestTrump(): IHandCard | null;
-  getLowestCard(): IHandCard | null;
-  getHigherCard(): IHandCard | null;
+  getLowestTrump(): ICard | null;
+  getLowestCard(): ICard | null;
+  getHigherCard(): ICard | null;
 }
 
 export interface IPack {
@@ -49,7 +45,10 @@ export interface IPack {
   shuffle(): void;
 }
 
-export interface IPlayer {}
+export interface IPlayer {
+  put(card: ICard): void;
+  take(cards: ICard[]): void;
+}
 
 export interface IUserPlayer extends IPlayer {
   hand: IHand;
@@ -72,4 +71,5 @@ export interface IGame {
   successfullDefense(): void;
   toTable(card: ICard): void;
   toDiscard(card: ICard): void;
+  onCardClick(player: IPlayer, card: ICard): void;
 }

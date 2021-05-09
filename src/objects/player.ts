@@ -1,5 +1,13 @@
-import { IHand, IPlayer } from './interfaces';
+import { IHand, IPlayer, IGame, ICard } from './interfaces';
 
 export class Player implements IPlayer {
-  constructor(readonly hand: IHand) {}
+  constructor(game: IGame, readonly hand: IHand) {}
+
+  put(card: ICard): void {
+    this.hand.removeCard(card);
+  }
+
+  take(cards: ICard[]) {
+    cards.map(card => this.hand.addCard(card));
+  }
 }
