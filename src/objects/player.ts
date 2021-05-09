@@ -3,7 +3,7 @@ import { IHand, IPlayer, IGame, ICard } from './interfaces';
 export class Player implements IPlayer {
   constructor(game: IGame, readonly hand: IHand) {}
 
-  put(card: ICard): void {
+  putCard(card: ICard): void {
     this.hand.removeCard(card);
   }
 

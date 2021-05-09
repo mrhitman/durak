@@ -47,7 +47,7 @@ export interface IPack {
 }
 
 export interface IPlayer {
-  put(card: ICard): void;
+  putCard(card: ICard): void;
   take(cards: ICard[]): void;
 }
 
@@ -68,12 +68,11 @@ export interface IGame {
   attacker: IPlayer;
   defender: IPlayer;
 
-  deal(): void;
+  deal(playerCount: number): void;
   swapRoles(): void;
-  beat(card: ICard, target: ICard): void;
+  beatCard(card: ICard, target: ICard): void;
   toAbandonTheDefence(): void;
   successfullDefense(): void;
-  toTable(card: ICard): void;
-  toDiscard(card: ICard): void;
-  onCardClick(player: IPlayer, card: ICard): void;
+  attackWithCard(card: ICard): void;
+  discardCard(card: ICard): void;
 }

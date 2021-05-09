@@ -1,33 +1,27 @@
 import { chain } from "lodash";
 import { Card } from "./card";
 import { Hand } from "./hand";
-import { CardRank, CardSuit, ICard, IGame, IPack, IPlayer, IUserPlayer } from "./interfaces";
+import { CardRank, CardSuit, ICard, IGame, IPack, IUserPlayer } from "./interfaces";
 import { Pack } from "./pack";
 import { Player } from "./player";
 
-enum GameState {
-  start,
-  attacking,
-  defencing,
-  gameover,
-}
-
+export const MAX_PLAYERS = 4;
 export class Game implements IGame {
   public tableCards: ICard[] = [];
-  public discardPile: ICard[] = [];
   public beatenTableCards: ICard[] = [];
+  public discardPile: ICard[] = [];
   public pack: IPack;
-  protected state: GameState;
+  public attacker: IUserPlayer;
+  public defender: IUserPlayer;
+  public players: IUserPlayer[] = [];
 
-  attacker: IUserPlayer;
-  defender: IUserPlayer;
-  players: IUserPlayer[] = [];
+  constructor() {}
 
-  constructor() {
-    this.state = GameState.start;
+  attackWithCard(card: ICard): void {
+    this.tableCards.push(card);
   }
 
-  beat(card: ICard, target: ICard): void {
+  beatCard(card: ICard, target: ICard): void {
     if (card.canBeat(target, this.pack.trump.suit)) {
       this.beatenTableCards.push(card);
       this.beatenTableCards.push(target);
@@ -46,9 +40,7 @@ export class Game implements IGame {
   }
 
   pullHands(): void {
-    const players = [this.attacker, this.defender];
-
-    players.map(player => {
+    this.players.map(player => {
       const hand = player.hand;
       const rest = 6 - hand.cards.length;
 
@@ -58,20 +50,24 @@ export class Game implements IGame {
     });
   }
 
-  toTable(card: ICard): void {
-    this.tableCards.push(card);
-  }
-
-  toDiscard(card: ICard): void {
+  discardCard(card: ICard): void {
     this.tableCards = this.tableCards.filter((c) => !c.isEqual(card));
     this.discardPile.push(card);
   }
 
-  swapRoles(): void {
+  swapRoles(defenceIsAbbandoned: boolean = false): void {
     this.players.unshift(this.players.pop());
+
+    if (defenceIsAbbandoned) {
+      this.players.unshift(this.players.pop());
+    }
+
+    this.attacker = this.players[0];
+    this.defender = this.players[1];
   }
 
-  deal(): void {
+  deal(playerCount: number = 2): void {
+    playerCount = Math.min(playerCount, MAX_PLAYERS);
     const cards = [];
     for (let rank of Object.values(CardRank)) {
       for (let suit of Object.values(CardSuit)) {
@@ -81,20 +77,11 @@ export class Game implements IGame {
 
     this.pack = new Pack(cards);
     this.pack.shuffle();
-    this.initRoles();
+    this.initRoles(playerCount);
   }
 
-  onCardClick(player: IPlayer, card: ICard) {
-    player.put(card);
-    this.toTable(card);
-    this.state = GameState.attacking;
-  }
-
-  protected initRoles(players = 2) {
-    const MAX_PLAYERS = 4;
-    players = Math.min(players, MAX_PLAYERS);
-
-    for (let i = 0; i < players; i++) {
+  protected initRoles(playerCount: number) {
+    for (let i = 0; i < playerCount; i++) {
       const player = new Player(this, new Hand([], this.pack.trump));
       this.pack.take(6).map((c) => player.hand.addCard(c));
       this.players.push(player);

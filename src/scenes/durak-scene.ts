@@ -31,7 +31,9 @@ export class DurakScene extends Scene {
       .tileSprite(0, 0, screen.availWidth - 40, screen.availHeight - 130, "table")
       .setOrigin(0, 0);
     this.createPlayerHand(this.game.canvas.width * 0.4, this.game.canvas.height * 0.7);
-    this.createEnemyHand(this.game.canvas.width * 0.4, this.game.canvas.height * 0.01);
+    for (let i = 0; i < this.engine.players.length - 1; i++) {
+      this.createEnemyHand(this.game.canvas.width * 0.25 + i * this.game.canvas.width * .2, this.game.canvas.height * 0.01, i + 1);
+    }
     this.createTableHand(this.game.canvas.width * 0.2, this.game.canvas.height * 0.5)
     this.createDiscardCards(this.game.canvas.width * 0.1, this.game.canvas.height * 0.9)
     this.createPack(this.game.canvas.width * 0.9, this.game.canvas.height * 0.35);
@@ -52,7 +54,7 @@ export class DurakScene extends Scene {
       .setInteractive()
       .setScale(0.1, 0.1)
       .addListener("pointerdown", () => {
-        this.clear();
+        this.clearAll();
         this.engine.swapRoles();
         this.create();
       });
@@ -64,7 +66,7 @@ export class DurakScene extends Scene {
       .setInteractive()
       .setScale(0.1, 0.1)
       .addListener("pointerdown", () => {
-        this.clear();
+        this.clearAll();
         this.engine.toAbandonTheDefence();
         this.engine.pullHands();
         this.create();
@@ -77,7 +79,7 @@ export class DurakScene extends Scene {
       .setInteractive()
       .setScale(0.1, 0.1)
       .addListener("pointerdown", () => {
-        this.clear();
+        this.clearAll();
         this.engine.successfullDefense();
         this.engine.swapRoles();
         this.engine.pullHands();
@@ -89,15 +91,15 @@ export class DurakScene extends Scene {
 
   public update() { }
 
-  private clear() {
+  private clearAll() {
     (this.add as any).displayList.removeAll();
   }
 
-  private createEnemyHand(x: number, y: number) {
+  private createEnemyHand(x: number, y: number, i: number) {
     const group = this.add.group();
 
     let offsetX = 0;
-    for (const _ of range(0, this.engine.defender.hand.cards.length)) {
+    for (const _ of range(0, this.engine.players[i].hand.cards.length)) {
       group.add(
         this.add
           .sprite(x + offsetX, y, `back`)
@@ -116,7 +118,8 @@ export class DurakScene extends Scene {
     let offsetX = 0;
     for (const card of this.engine.attacker.hand.cards) {
       const cardSprite = new HandCard(this, x + offsetX, y, `${card.rank}${card.suit}`, () => {
-        this.engine.onCardClick(this.engine.attacker, card);
+        this.engine.attacker.putCard(card);
+        this.engine.attackWithCard(card);
       })
         .setDepth(this.depth++)
         .setScale(scale, scale)
