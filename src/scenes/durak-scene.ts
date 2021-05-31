@@ -1,15 +1,13 @@
 import { random, range } from "lodash";
 import { GameObjects, Scene } from "phaser";
-import { HandCard } from "../hand-card";
-import { cards, suits } from "../constants";
+import { cards, suits } from "../objects/constants";
 import { Game } from "../objects/game";
+import { IUserPlayer } from "../objects/interfaces";
 
 const scale = 0.22;
 export class DurakScene extends Scene {
-  protected depth = 1;
   protected bg: GameObjects.TileSprite;
   protected engine: Game;
-  public slot = 0;
 
   public preload() {
     this.load.image("table", "assets/table.png");
@@ -22,7 +20,7 @@ export class DurakScene extends Scene {
       }
     }
     this.engine = new Game();
-    this.engine.deal();
+    this.engine.deal(0);
   }
 
   public get width() {
@@ -60,6 +58,8 @@ export class DurakScene extends Scene {
     this.createPlayerHand();
     this.createDiscardCards();
     this.createPack();
+    this.createTableHand();
+    this.createEnemyHands();
   }
 
   public update() { }
@@ -68,11 +68,25 @@ export class DurakScene extends Scene {
     (this.add as any).displayList.removeAll();
   }
 
-  private createEnemyHand(x: number, y: number, i: number) {
+  private createEnemyHands() {
+    const playerCount = this.engine.players.length - 1;
+    const width = this.width * 0.95;
+
+    this.engine.players.slice(1).map((player, i) => {
+      const x = playerCount === 1
+        ? this.widthHalf - (this.cardWidth + 24 * player.hand.cards.length) / 2
+        : ((width * i) / playerCount) + width * 0.02;
+        // @TODO center 2 and 3 enemies
+      const y = this.height * 0.025;
+      this.createEnemyHand(x, y, player);
+    })
+  }
+
+  private createEnemyHand(x: number, y: number, player: IUserPlayer) {
     const group = this.add.group();
 
     let offsetX = 0;
-    for (const _ of range(0, this.engine.players[i].hand.cards.length)) {
+    for (const _ of range(0, player.hand.cards.length)) {
       group.add(
         this.add
           .sprite(x + offsetX, y, `back`)
@@ -107,24 +121,25 @@ export class DurakScene extends Scene {
     return group;
   }
 
-  private createTableHand(x: number, y: number) {
+  private createTableHand() {
+    const count = this.engine.tableCards.length;
+    const spacer = this.width * (count > 6 ? 0.01 : 0.02);
+    const width = count * (this.cardWidth + spacer);
+    const y = this.heightHalf;
+    const x = this.widthHalf - width / 2;
+
     const group = this.add.group();
       
     let offsetX = 0;
-    let slot = 0;
     for (const card of this.engine.tableCards) {
-      const cardSprite = new HandCard(this, x + offsetX, y, `${card.rank}${card.suit}`)
-        .setDepth(this.depth++)
-        .setPosition(this.game.canvas.width * 0.05 + slot * 180, this.game.canvas.height * 0.36)
+      const cardSprite = new GameObjects.Sprite(this, x + offsetX, y, `${card.rank}${card.suit}`)
         .setScale(scale, scale)
-        .setState('ontable')
-        .setOrigin(0, 0.1)
+        .setOrigin(0.5, 0.5)
 
-      slot++;
       this.add.existing(cardSprite);
 
       group.add(cardSprite);
-      offsetX += 60;
+      offsetX += spacer + this.cardWidth;
     }
 
     return group;
