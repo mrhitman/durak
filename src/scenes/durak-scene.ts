@@ -1,8 +1,8 @@
-import { random, range } from "lodash";
-import { GameObjects, Scene } from "phaser";
-import { cards, suits } from "../objects/constants";
-import { Game } from "../objects/game";
-import { IUserPlayer } from "../objects/interfaces";
+import { random, range } from 'lodash';
+import { GameObjects, Scene } from 'phaser';
+import { cards, suits } from '../objects/constants';
+import { Game } from '../objects/game';
+import { IUserPlayer } from '../objects/interfaces';
 
 const scale = 0.22;
 export class DurakScene extends Scene {
@@ -10,9 +10,9 @@ export class DurakScene extends Scene {
   protected engine: Game;
 
   public preload() {
-    this.load.image("table", "assets/table.png");
-    this.load.image("back", "assets/green_back.png");
-    this.load.image("button", "assets/button.png");
+    this.load.image('table', 'assets/table.png');
+    this.load.image('back', 'assets/green_back.png');
+    this.load.image('button', 'assets/button.png');
 
     for (const card of cards) {
       for (const suit of suits) {
@@ -20,7 +20,7 @@ export class DurakScene extends Scene {
       }
     }
     this.engine = new Game();
-    this.engine.deal(0);
+    this.engine.deal(2);
   }
 
   public get width() {
@@ -50,10 +50,7 @@ export class DurakScene extends Scene {
   }
 
   public create() {
-
-    this.bg = this.add
-      .tileSprite(0, 0, this.width, this.height, "table")
-      .setOrigin(0, 0);
+    this.bg = this.add.tileSprite(0, 0, this.width, this.height, 'table').setOrigin(0, 0);
 
     this.createPlayerHand();
     this.createDiscardCards();
@@ -62,7 +59,7 @@ export class DurakScene extends Scene {
     this.createEnemyHands();
   }
 
-  public update() { }
+  public update() {}
 
   private clearAll() {
     (this.add as any).displayList.removeAll();
@@ -70,16 +67,14 @@ export class DurakScene extends Scene {
 
   private createEnemyHands() {
     const playerCount = this.engine.players.length - 1;
-    const width = this.width * 0.95;
 
-    this.engine.players.slice(1).map((player, i) => {
-      const x = playerCount === 1
-        ? this.widthHalf - (this.cardWidth + 24 * player.hand.cards.length) / 2
-        : ((width * i) / playerCount) + width * 0.02;
-        // @TODO center 2 and 3 enemies
+    this.engine.players.slice(1).forEach((player, i) => {
+      const x =
+        (this.widthHalf / playerCount) * (i + 1) -
+        (this.cardWidth + 24 * player.hand.cards.length) / 2 + this.width * i * 0.05;
       const y = this.height * 0.025;
       this.createEnemyHand(x, y, player);
-    })
+    });
   }
 
   private createEnemyHand(x: number, y: number, player: IUserPlayer) {
@@ -109,8 +104,12 @@ export class DurakScene extends Scene {
 
     let offsetX = 0;
     for (const card of this.engine.attacker.hand.cards) {
-      const cardSprite = new GameObjects.Sprite(this, x + offsetX, y, `${card.rank}${card.suit}`)
-        .setScale(scale, scale);
+      const cardSprite = new GameObjects.Sprite(
+        this,
+        x + offsetX,
+        y,
+        `${card.rank}${card.suit}`
+      ).setScale(scale, scale);
 
       this.add.existing(cardSprite);
 
@@ -129,12 +128,12 @@ export class DurakScene extends Scene {
     const x = this.widthHalf - width / 2;
 
     const group = this.add.group();
-      
+
     let offsetX = 0;
     for (const card of this.engine.tableCards) {
       const cardSprite = new GameObjects.Sprite(this, x + offsetX, y, `${card.rank}${card.suit}`)
         .setScale(scale, scale)
-        .setOrigin(0.5, 0.5)
+        .setOrigin(0.5, 0.5);
 
       this.add.existing(cardSprite);
 
