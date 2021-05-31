@@ -4,7 +4,7 @@ import { HandCard } from "../hand-card";
 import { cards, suits } from "../constants";
 import { Game } from "../objects/game";
 
-const scale = 0.24;
+const scale = 0.22;
 export class DurakScene extends Scene {
   protected depth = 1;
   protected bg: GameObjects.TileSprite;
@@ -25,68 +25,42 @@ export class DurakScene extends Scene {
     this.engine.deal();
   }
 
+  public get width() {
+    return this.game.canvas.width;
+  }
+
+  public get widthHalf() {
+    return this.game.canvas.width / 2;
+  }
+
+  public get height() {
+    return this.game.canvas.height;
+  }
+
+  public get heightHalf() {
+    return this.game.canvas.height / 2;
+  }
+
+  public get cardWidth() {
+    const card = this.game.textures.getFrame('2C');
+    return card.width * scale;
+  }
+
+  public get cardHeight() {
+    const card = this.game.textures.getFrame('2C');
+    return card.height * scale;
+  }
+
   public create() {
-    this.slot = this.engine.tableCards.length;
+
     this.bg = this.add
-      .tileSprite(0, 0, screen.availWidth - 40, screen.availHeight - 130, "table")
+      .tileSprite(0, 0, this.width, this.height, "table")
       .setOrigin(0, 0);
-    this.createPlayerHand(this.game.canvas.width * 0.4, this.game.canvas.height * 0.7);
-    for (let i = 0; i < this.engine.players.length - 1; i++) {
-      this.createEnemyHand(this.game.canvas.width * 0.25 + i * this.game.canvas.width * .2, this.game.canvas.height * 0.01, i + 1);
-    }
-    this.createTableHand(this.game.canvas.width * 0.2, this.game.canvas.height * 0.5)
-    this.createDiscardCards(this.game.canvas.width * 0.1, this.game.canvas.height * 0.9)
-    this.createPack(this.game.canvas.width * 0.9, this.game.canvas.height * 0.35);
-    this.add
-      .sprite(70, 30, "button")
-      .setOrigin(0.5, 0.5)
-      .setInteractive()
-      .setScale(0.1, 0.1)
-      .addListener("pointerdown", () => {
-        this.scene.restart();
-        this.create();
-        this.slot = 0;
-      });
-    this.add.text(50, 24, 'RESET', { color: '#000' });
-    this.add
-      .sprite(70, 80, "button")
-      .setOrigin(0.5, 0.5)
-      .setInteractive()
-      .setScale(0.1, 0.1)
-      .addListener("pointerdown", () => {
-        this.clearAll();
-        this.engine.swapRoles();
-        this.create();
-      });
-    this.add.text(54, 74, 'SWAP', { color: '#000' });
 
-    this.add
-      .sprite(70, 130, "button")
-      .setOrigin(0.5, 0.5)
-      .setInteractive()
-      .setScale(0.1, 0.1)
-      .addListener("pointerdown", () => {
-        this.clearAll();
-        this.engine.toAbandonTheDefence();
-        this.engine.pullHands();
-        this.create();
-      });
-    this.add.text(54, 124, 'PASS', { color: '#000' });
-
-    this.add
-      .sprite(70, 180, "button")
-      .setOrigin(0.5, 0.5)
-      .setInteractive()
-      .setScale(0.1, 0.1)
-      .addListener("pointerdown", () => {
-        this.clearAll();
-        this.engine.successfullDefense();
-        this.engine.swapRoles();
-        this.engine.pullHands();
-        this.create();
-      });
-
-    this.add.text(54, 174, 'END STEP', { color: '#000' });
+    const cardCount = this.engine.attacker.hand.cards.length;
+    const spacer = Math.max((this.width * 0.2) / cardCount, 35);
+    const handsSize = spacer * (cardCount - 1) + this.cardWidth - spacer;
+    this.createPlayerHand(this.widthHalf - handsSize / 2, this.height - this.cardHeight / 2 - this.height * 0.02, spacer);
   }
 
   public update() { }
@@ -112,24 +86,18 @@ export class DurakScene extends Scene {
     return group;
   }
 
-  private createPlayerHand(x: number, y: number) {
+  private createPlayerHand(x: number, y: number, spacer = 30) {
     const group = this.add.group();
 
     let offsetX = 0;
     for (const card of this.engine.attacker.hand.cards) {
-      const cardSprite = new HandCard(this, x + offsetX, y, `${card.rank}${card.suit}`, () => {
-        this.engine.attacker.putCard(card);
-        this.engine.attackWithCard(card);
-      })
-        .setDepth(this.depth++)
-        .setScale(scale, scale)
-        .setOrigin(0, 0.1)
-        .setInteractive();
+      const cardSprite = new GameObjects.Sprite(this, x + offsetX, y, `${card.rank}${card.suit}`)
+        .setScale(scale, scale);
 
       this.add.existing(cardSprite);
 
       group.add(cardSprite);
-      offsetX += 30;
+      offsetX += spacer;
     }
 
     return group;
