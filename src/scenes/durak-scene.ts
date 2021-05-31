@@ -42,12 +42,12 @@ export class DurakScene extends Scene {
   }
 
   public get cardWidth() {
-    const card = this.game.textures.getFrame('2C');
+    const card = this.game.textures.getFrame('back');
     return card.width * scale;
   }
 
   public get cardHeight() {
-    const card = this.game.textures.getFrame('2C');
+    const card = this.game.textures.getFrame('back');
     return card.height * scale;
   }
 
@@ -57,10 +57,9 @@ export class DurakScene extends Scene {
       .tileSprite(0, 0, this.width, this.height, "table")
       .setOrigin(0, 0);
 
-    const cardCount = this.engine.attacker.hand.cards.length;
-    const spacer = Math.max((this.width * 0.2) / cardCount, 35);
-    const handsSize = spacer * (cardCount - 1) + this.cardWidth - spacer;
-    this.createPlayerHand(this.widthHalf - handsSize / 2, this.height - this.cardHeight / 2 - this.height * 0.02, spacer);
+    this.createPlayerHand();
+    this.createDiscardCards();
+    this.createPack();
   }
 
   public update() { }
@@ -86,7 +85,12 @@ export class DurakScene extends Scene {
     return group;
   }
 
-  private createPlayerHand(x: number, y: number, spacer = 30) {
+  private createPlayerHand() {
+    const cardCount = this.engine.attacker.hand.cards.length;
+    const spacer = Math.min(Math.max((this.width * 0.2) / cardCount, 35), 45);
+    const handsSize = spacer * (cardCount - 1) + this.cardWidth - spacer;
+    const x = this.widthHalf - handsSize / 2;
+    const y = this.height - this.cardHeight / 2 - this.height * 0.02;
     const group = this.add.group();
 
     let offsetX = 0;
@@ -126,14 +130,16 @@ export class DurakScene extends Scene {
     return group;
   }
 
-  private createDiscardCards(x: number, y: number) {
+  private createDiscardCards() {
+    const x = this.width * 0.02 + this.cardWidth / 2;
+    const y = this.height - this.cardHeight + this.height * 0.02;
     const group = this.add.group();
 
     for (const _ of range(0, this.engine.discardPile.length)) {
       group.add(
         this.add
-          .sprite(x + random(-10, 10), y + random(-10, 10), `back`)
-          .setRotation(random(0, 5))
+          .sprite(x, y, `back`)
+          .setRotation(random(-0.08, 0.08, true))
           .setScale(scale, scale)
           .setOrigin(0.5, 0.5)
       );
@@ -142,16 +148,18 @@ export class DurakScene extends Scene {
     return group;
   }
 
-  private createPack(x: number, y: number) {
+  private createPack() {
+    const x = this.width - this.cardWidth - this.width * 0.02;
+    const y = this.heightHalf;
     const group = this.add.group();
 
     let offsetX = 0;
     group.add(
       this.add
-        .sprite(x + 70, y + 118, `${this.engine.pack.trump.rank}${this.engine.pack.trump.suit}`)
+        .sprite(x, y, `${this.engine.pack.trump.rank}${this.engine.pack.trump.suit}`)
         .setScale(scale, scale)
         .setAngle(90)
-        .setOrigin(0.5, 0.05)
+        .setOrigin(0.5, 0.5)
     );
     offsetX += 60;
 
@@ -160,7 +168,7 @@ export class DurakScene extends Scene {
         this.add
           .sprite(x + offsetX, y, `back`)
           .setScale(scale, scale)
-          .setOrigin(0.5, 0.05)
+          .setOrigin(0.5, 0.5)
       );
       offsetX += Math.min(50 / this.engine.pack.cards.length, 10);
     }
